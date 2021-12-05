@@ -1,0 +1,13 @@
+.loginRow {
+  height: 100%;
+  margin: 50px 0;
+}
+
+.loginRow .loginFormCard {
+  min-width: 400px;
+}
+
+.loginFormContainer {
+  height: calc(100vh - 306px);
+  padding-top: 50px;
+}

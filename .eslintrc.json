@@ -1,0 +1,38 @@
+{
+    "env": {
+      "browser": true,
+      "es6": true,
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:import/recommended",
+      "plugin:import/typescript",
+      "plugin:react-hooks/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      },
+      "warnOnUnsupportedTypeScriptVersion": true
+    },
+    "rules": {
+      "@typescript-eslint/no-var-requires": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-constant-condition": ["error", { "checkLoops": false }]
+    },
+    "settings": {
+      "import/resolver": {
+        "typescript": {} // this loads <rootdir>/tsconfig.json to eslint
+      }
+    },
+    "plugins": ["@typescript-eslint"]
+  }
+  

@@ -1,0 +1,24 @@
+@import "~antd/dist/antd.css";
+
+.context-modal {
+  height: calc(100% - 50px);
+}
+
+.settings-modal,
+.calculation-modal,
+.mounting-document-creation-modal {
+  height: calc(100% - 250px);
+}
+
+.resource-modal {
+  height: calc(100% - 120px);
+}
+
+.context-modal .ant-modal-content,
+.settings-modal .ant-modal-content,
+.calculation-modal .ant-modal-content,
+.mounting-document-creation-modal .ant-modal-content,
+.resource-modal .ant-modal-content {
+  height: 100%;
+  overflow: hidden;
+}

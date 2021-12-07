@@ -37,7 +37,7 @@ function PrivateRoute({ component: Component, ...rest }: any): ReactElement {
             </main>
           </>
         ) : (
-          <Redirect to="/welcome" />
+          <Redirect to="/auth/login" />
         )
       }
     />

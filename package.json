@@ -1,7 +1,7 @@
 {
-  "name": "Hotel",
-  "description": "Hotel management",
-  "author": "Voltis",
+  "name": "hotel",
+  "description": "Hotel",
+  "author": "Themesberg",
   "keywords": [
     "bootstrap 5",
     "react",
@@ -11,8 +11,7 @@
     "react ui library",
     "react bootstrap 5",
     "bootstrap 5 dashboard",
-    "themesberg",
-    "onima"
+    "themesberg"
   ],
   "license": "MIT",
   "version": "1.0.0",

@@ -1,5 +1,3 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAngleDown,
   faAngleUp,
@@ -13,37 +11,37 @@ import {
   faPen,
   faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Col,
-  Row,
-  Nav,
-  Card,
-  Image,
   Button,
-  Table,
-  Dropdown,
-  ProgressBar,
-  Pagination,
   ButtonGroup,
+  Card,
+  Col,
+  Dropdown,
+  Image,
+  Nav,
+  Pagination,
+  ProgressBar,
+  Row,
+  Table,
 } from "@themesberg/react-bootstrap";
+import React from "react";
 import { Link } from "react-router-dom";
-
-import { Routes } from "../routes";
+import clients from "../data/clients";
 import {
-  pageVisits,
-  designersTasks,
-  pageRanking,
-  socialMediaTasks,
-  myTasks,
   categories,
-  status,
-  rooms,
+  designersTasks,
+  myTasks,
+  pageRanking,
+  pageVisits,
   reservations,
+  rooms,
+  socialMediaTasks,
+  status,
 } from "../data/tables";
 import users from "../data/users";
-import clients from "../data/clients";
-import commands from "../data/commands";
 import useShowReserveRoomModal from "../features/management/hooks/useShowReserveRoomModal";
+import { Routes } from "../routes";
 
 const ValueChange = ({ value, suffix = "" }) => {
   const valueIcon = value < 0 ? faAngleDown : faAngleUp;
@@ -215,7 +213,6 @@ export const DesignersTable = () => {
       taskName,
       startDate,
       endDate,
-      difficulty,
       payment,
     } = props;
 
@@ -382,8 +379,6 @@ export const MyTasks = () => {
   const TableRow = (props) => {
     const {
       id,
-      name,
-      surname,
       taskName,
       description,
       category,
@@ -997,9 +992,9 @@ export const CommandsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {commands.map((c) => (
+            {/* {commands.map((c) => (
               <TableRow key={`command-${c.id}`} {...c} />
-            ))}
+            ))} */}
           </tbody>
         </Table>
       </Card.Body>

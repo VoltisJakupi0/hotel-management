@@ -1,35 +1,25 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCashRegister, faChartLine } from "@fortawesome/free-solid-svg-icons";
 import {
-  faCashRegister,
-  faChartLine,
-  faCloudUploadAlt,
-  faPlus,
-  faRocket,
-  faTasks,
-  faUserShield,
-} from "@fortawesome/free-solid-svg-icons";
-import {
-  Col,
-  Row,
   Button,
-  Dropdown,
   ButtonGroup,
+  Col,
+  Dropdown,
+  Row,
 } from "@themesberg/react-bootstrap";
-
+import React from "react";
+import { PageVisitsTable } from "../../../components/Tables";
 import {
-  CounterWidget,
-  CircleChartWidget,
+  AcquisitionWidget,
   BarChartWidget,
-  TeamMembersWidget,
+  CircleChartWidget,
+  CounterWidget,
   ProgressTrackWidget,
   RankingWidget,
   SalesValueWidget,
   SalesValueWidgetPhone,
-  AcquisitionWidget,
+  TeamMembersWidget,
 } from "../../../components/Widgets";
-import { PageVisitsTable } from "../../../components/Tables";
-import { trafficShares, totalOrders } from "../../../data/charts";
+import { totalOrders, trafficShares } from "../../../data/charts";
 
 export default () => {
   return (
@@ -42,29 +32,8 @@ export default () => {
             size="sm"
             className="me-2"
           >
-            {/* <FontAwesomeIcon icon={faPlus} className="me-2" /> */}
             Your Dashboard
           </Dropdown.Toggle>
-          {/* <Dropdown.Menu className="dashboard-dropdown dropdown-menu-left mt-2">
-            <Dropdown.Item className="fw-bold">
-              <FontAwesomeIcon icon={faTasks} className="me-2" /> New Task
-            </Dropdown.Item>
-            <Dropdown.Item className="fw-bold">
-              <FontAwesomeIcon icon={faCloudUploadAlt} className="me-2" />{" "}
-              Upload Files
-            </Dropdown.Item>
-            <Dropdown.Item className="fw-bold">
-              <FontAwesomeIcon icon={faUserShield} className="me-2" /> Preview
-              Security
-            </Dropdown.Item>
-
-            <Dropdown.Divider />
-
-            <Dropdown.Item className="fw-bold">
-              <FontAwesomeIcon icon={faRocket} className="text-danger me-2" />{" "}
-              Upgrade to Pro
-            </Dropdown.Item>
-          </Dropdown.Menu> */}
         </Dropdown>
 
         <ButtonGroup>

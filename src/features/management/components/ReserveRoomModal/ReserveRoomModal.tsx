@@ -2,9 +2,23 @@ import { Row, Form, Spin, Input, Select, Button, DatePicker } from "antd";
 import React, { ReactElement } from "react";
 import { useForm } from "antd/es/form/Form";
 import useHideModal from "../../../modal/hooks/useHideModal";
+import moment from "moment";
+
+function disableDateRanges({ startDate, endDate }) {
+  return function disabledDate(current) {
+    let startCheck = true;
+    let endCheck = true;
+    if (startDate) {
+      startCheck = current && current < moment(startDate, "YYYY-MM-DD");
+    }
+    if (endDate) {
+      endCheck = current && current > moment(endDate, "YYYY-MM-DD");
+    }
+    return (startDate && startCheck) || (endDate && endCheck);
+  };
+}
 
 interface FormValues {
-  roomNr: string;
   clientName: string;
   clientSurname: string;
   clientEmail: string;
@@ -13,7 +27,6 @@ interface FormValues {
 }
 
 const initialValues = {
-  roomNr: "",
   maxClientNumber: "",
   category: "",
   status: "",
@@ -32,9 +45,6 @@ function ReserveRoomModal(): ReactElement {
         form={form}
         initialValues={initialValues}
       >
-        <Form.Item name="roomNr" label="Room Number">
-          <Input />
-        </Form.Item>
         <Form.Item name="clientName" label="Client Name">
           <Input />
         </Form.Item>
@@ -45,10 +55,22 @@ function ReserveRoomModal(): ReactElement {
           <Input type="email" />
         </Form.Item>
         <Form.Item name="reservationDate" label="Reservation Date">
-          <DatePicker />
+          <DatePicker
+            style={{ width: 361 }}
+            disabledDate={(current) => {
+              let customDate = moment().format("YYYY-MM-DD");
+              return current && current < moment(customDate, "YYYY-MM-DD");
+            }}
+          />
         </Form.Item>
         <Form.Item name="endReservationDate" label="Leave Date">
-          <DatePicker />
+          <DatePicker
+            style={{ width: 361 }}
+            disabledDate={(current) => {
+              let customDate = moment().format("YYYY-MM-DD");
+              return current && current < moment(customDate, "YYYY-MM-DD");
+            }}
+          />
         </Form.Item>
 
         <Row justify="end" style={{ marginTop: 50 }}>

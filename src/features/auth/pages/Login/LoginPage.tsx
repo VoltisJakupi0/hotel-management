@@ -10,6 +10,8 @@ import LoginForm from "../../components/LoginForm/LoginForm";
 import { useGetLoginDataMutation } from "../../services/authApi";
 import { removeAuthToken, setAuthToken } from "../../utils/localStorage";
 import styles from "./LoginPage.module.css";
+import img from "../../../../assets/img/img.jpeg";
+import { Image } from "antd";
 
 function error(content?: string): void {
   message.error(content);
@@ -43,13 +45,21 @@ function LoginPage(): ReactElement {
   );
 
   return (
-    <Row className={styles.loginRow} justify="center" align="middle">
-      <Col>
-        <Card className={styles.loginFormCard}>
-          <LoginForm onSubmit={handleSubmit} loading={isLoadingGetLoginData} />
-        </Card>
-      </Col>
-    </Row>
+    <>
+      <Row className={styles.loginRow} justify="start">
+        <Col span={17}>
+          <Image height={945} width={1200} src={img} />
+        </Col>
+        <Col className={styles.loginFormCard} span={5}>
+          <Card style={{ width: 400 }}>
+            <LoginForm
+              onSubmit={handleSubmit}
+              loading={isLoadingGetLoginData}
+            />
+          </Card>
+        </Col>
+      </Row>
+    </>
   );
 }
 

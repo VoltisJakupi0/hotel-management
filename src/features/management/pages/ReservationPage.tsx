@@ -12,11 +12,8 @@ import {
 } from "@themesberg/react-bootstrap";
 
 import { ReservationsTable } from "../../../components/Tables";
-import useShowCreateStatusModal from "../hooks/useShowCreateStatusModal";
 
 function ReservationPage(): ReactElement {
-  const showCreateStatusModal = useShowCreateStatusModal();
-
   return (
     <>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">

@@ -1,36 +1,21 @@
-import React, { useState } from "react";
-import SimpleBar from "simplebar-react";
-import { useLocation } from "react-router-dom";
-import { CSSTransition } from "react-transition-group";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faPenFancy,
-  faUserFriends,
+  faCheck,
+  faRestroom,
   faSignOutAlt,
   faTimes,
+  faUserFriends,
   faUsers,
-  faTasks,
-  faPhotoVideo,
-  faCamera,
-  faRestroom,
-  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  Nav,
-  Badge,
-  Image,
-  Button,
-  Navbar,
-  Accordion,
-} from "@themesberg/react-bootstrap";
-import { Link } from "react-router-dom";
-
-import { Routes } from "../routes";
-import OnimaLogo from "../assets/img/technologies/onima.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Badge, Button, Image, Nav, Navbar } from "@themesberg/react-bootstrap";
+import React, { useState } from "react";
+import { Link, useHistory, useLocation } from "react-router-dom";
+import { CSSTransition } from "react-transition-group";
+import SimpleBar from "simplebar-react";
 import ProfilePicture from "../assets/img/team/profile-picture-3.jpg";
-import { useHistory } from "react-router-dom";
-import { faMeetup } from "@fortawesome/free-brands-svg-icons";
+import OnimaLogo from "../assets/img/technologies/onima.png";
 import useHasAdminRole from "../features/auth/hooks/useHasAdminRole";
+import { Routes } from "../routes";
 
 export default () => {
   const location = useLocation();
@@ -41,33 +26,6 @@ export default () => {
   const isAdmin = useHasAdminRole();
 
   const onCollapse = () => setShow(!show);
-
-  const CollapsableNavItem = (props) => {
-    const { eventKey, title, icon, children = null } = props;
-
-    const defaultKey = pathname.indexOf(eventKey) !== -1 ? eventKey : "";
-
-    return (
-      <Accordion as={Nav.Item} defaultActiveKey={defaultKey}>
-        <Accordion.Item eventKey={eventKey}>
-          <Accordion.Button
-            as={Nav.Link}
-            className="d-flex justify-content-between align-items-center"
-          >
-            <span>
-              <span className="sidebar-icon">
-                <FontAwesomeIcon icon={icon} />{" "}
-              </span>
-              <span className="sidebar-text">{title}</span>
-            </span>
-          </Accordion.Button>
-          <Accordion.Body className="multi-level">
-            <Nav className="flex-column">{children}</Nav>
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-    );
-  };
 
   const NavItem = (props) => {
     const {
@@ -94,7 +52,7 @@ export default () => {
           {...linkProps}
           target={target}
           className={classNames}
-          to="/dashboard"
+          to="/hotel"
         >
           <span>
             {icon ? (

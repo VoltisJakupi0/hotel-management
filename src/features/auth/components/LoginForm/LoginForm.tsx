@@ -31,7 +31,8 @@ function LoginForm({ onSubmit, loading }: LoginFormProps): ReactElement {
 
   return (
     <Spin spinning={loading}>
-      <Title level={2}>Kyqu</Title>
+      <Title level={2}>Menaxhimi i Hotelierise</Title>
+      <Title level={4}>Kyquni</Title>
       <Form<FormValues> form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item label="E-Mail" name={InputNames.Email} rules={generalRule}>
           <Input placeholder="E-Mail" />

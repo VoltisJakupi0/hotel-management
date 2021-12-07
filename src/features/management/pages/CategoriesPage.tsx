@@ -12,7 +12,7 @@ import {
 } from "@themesberg/react-bootstrap";
 import useHasAdminRole from "../../auth/hooks/useHasAdminRole";
 
-import { CategoriesTable, ClientsTable } from "../../../components/Tables";
+import { CategoriesTable } from "../../../components/Tables";
 import useShowCreateCategoryModal from "../hooks/useShowCreateClientModal";
 
 function CategoriesPage(): ReactElement {

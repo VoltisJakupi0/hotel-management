@@ -12,7 +12,6 @@ import {
 } from "@themesberg/react-bootstrap";
 
 import { RoomsTable } from "../../../components/Tables";
-import useShowCreateStatusModal from "../hooks/useShowCreateStatusModal";
 import useShowCreateRoomModal from "../hooks/useShowCreateRoomModal";
 import useHasAdminRole from "../../auth/hooks/useHasAdminRole";
 

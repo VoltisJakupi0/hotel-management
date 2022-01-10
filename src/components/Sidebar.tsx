@@ -13,7 +13,6 @@ import { Link, useHistory, useLocation } from "react-router-dom";
 import { CSSTransition } from "react-transition-group";
 import SimpleBar from "simplebar-react";
 import ProfilePicture from "../assets/img/team/profile-picture-3.jpg";
-import OnimaLogo from "../assets/img/technologies/onima.png";
 import useHasAdminRole from "../features/auth/hooks/useHasAdminRole";
 import { Routes } from "../routes";
 
@@ -24,6 +23,7 @@ export default () => {
   const [show, setShow] = useState(false);
   const showClass = show ? "show" : "";
   const isAdmin = useHasAdminRole();
+  const language = localStorage.getItem("language");
 
   const onCollapse = () => setShow(!show);
 
@@ -52,7 +52,7 @@ export default () => {
           {...linkProps}
           target={target}
           className={classNames}
-          to="/hotel"
+          to="/rooms"
         >
           <span>
             {icon ? (
@@ -90,9 +90,7 @@ export default () => {
           className="me-lg-5"
           as={Link}
           to={Routes.DashboardOverview.path}
-        >
-          <Image src={OnimaLogo} className="navbar-brand-light" />
-        </Navbar.Brand>
+        ></Navbar.Brand>
         <Navbar.Toggle
           as={Button}
           aria-controls="main-navbar"
@@ -115,7 +113,6 @@ export default () => {
                   />
                 </div>
                 <div className="d-block">
-                  <h6>Hi, Jane</h6>
                   <Button
                     as={Link}
                     variant="secondary"
@@ -134,40 +131,49 @@ export default () => {
                 <FontAwesomeIcon icon={faTimes} />
               </Nav.Link>
             </div>
+            <div style={{ marginTop: 30 }}></div>
+
             <Nav className="flex-column pt-3 pt-md-0">
               <NavItem
-                title="Hotel Management"
-                onClick={() => history.push("/hotel")}
-                image={OnimaLogo}
+                title={
+                  language == "sq"
+                    ? "Menaxhimi i Hotelierise"
+                    : "Hotel Management"
+                }
+                onClick={() => history.push("/rooms")}
+              />
+              <div style={{ marginTop: 20 }}></div>
+              <NavItem
+                onClick={() => history.push("/rooms")}
+                title={language == "sq" ? "Dhomat" : "Rooms"}
+                icon={faRestroom}
+              />
+              <NavItem
+                onClick={() => history.push("/reservation-rooms")}
+                title={
+                  language == "sq" ? "Rezervimi i Dhomave" : "Booked Rooms"
+                }
+                icon={faRestroom}
               />
               <>
                 {isAdmin && (
                   <NavItem
-                    title="Users"
+                    title={language == "sq" ? "Perdoruesit" : "Users"}
                     icon={faUsers}
                     onClick={() => history.push("/users")}
                   />
                 )}
                 <NavItem
-                  title="Categories"
+                  title={language == "sq" ? "Kategorite" : "Categories"}
                   icon={faUserFriends}
                   onClick={() => history.push("/categories")}
                 />
                 <NavItem
-                  title="Status"
+                  title={language == "sq" ? "Statusi" : "Status"}
                   onClick={() => history.push("/status")}
                   icon={faCheck}
                 />
-                <NavItem
-                  onClick={() => history.push("/rooms")}
-                  title="Rooms"
-                  icon={faRestroom}
-                />
-                <NavItem
-                  onClick={() => history.push("/reservation-rooms")}
-                  title="Reservation Room"
-                  icon={faRestroom}
-                />
+
                 {/* <CollapsableNavItem title="Task Management" icon={faTasks}>
                     <NavItem
                       onClick={() => history.push("/task/designers")}

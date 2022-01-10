@@ -2,9 +2,9 @@ import { useSelector } from "react-redux";
 import { authUserSelector } from "../selectors/auth.selectors";
 
 function useHasAdminRole(): boolean {
-  const authUser = useSelector(authUserSelector);
+  const authUser: any = useSelector(authUserSelector);
 
-  return authUser?.name === "dr / Daniel Rausch" ? true : false;
+  return authUser?.data?.user?.role_id == 3 ? false : true;
 }
 
 export default useHasAdminRole;

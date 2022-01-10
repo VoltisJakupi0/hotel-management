@@ -1,7 +1,7 @@
 import { authFeatureName } from "../authSlice";
 import { User } from "../models/auth.model";
 
-function getAuthToken(): User | null {
+function getAuthToken(): User | any {
   const storage = localStorage.getItem(authFeatureName);
 
   if (storage) {

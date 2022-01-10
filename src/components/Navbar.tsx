@@ -18,6 +18,7 @@ import {
 } from "@themesberg/react-bootstrap";
 import React, { ReactElement } from "react";
 import { useSelector } from "react-redux";
+import { auth } from "../api/api";
 import { useAppDispatch } from "../app/store";
 import Profile3 from "../assets/img/team/profile-picture-3.jpg";
 import { setAuthUser } from "../features/auth/authSlice";
@@ -26,11 +27,19 @@ import { removeAuthToken } from "../features/auth/utils/localStorage";
 import { api } from "../services/api";
 
 export function User(): ReactElement {
-  const authUser = useSelector(authUserSelector);
+  const authUser: any = useSelector(authUserSelector);
 
-  // return <div>{authUser.name}</div>;
   return (
-    <div>{authUser.name == "dr / Daniel Rausch" ? "Admin" : "Basic User"}</div>
+    <>
+      <div>
+        {authUser?.data?.user?.first_name + " " + authUser?.data?.user?.surname}
+      </div>
+      <div>
+        <span style={{ color: "grey" }}>
+          {authUser?.data?.user?.role_id == 3 ? "Basic User" : "Admin"}
+        </span>
+      </div>
+    </>
   );
 }
 
@@ -51,18 +60,44 @@ export default () => {
     <Navbar variant="dark" expanded className="ps-0 pe-2 pb-0">
       <Container fluid className="px-0">
         <div className="d-flex justify-content-between w-100">
-          <div className="d-flex align-items-center">
-            <Form className="navbar-search">
-              <Form.Group id="topbarSearch">
-                <InputGroup className="input-group-merge search-bar">
-                  <InputGroup.Text>
-                    <FontAwesomeIcon icon={faSearch} />
-                  </InputGroup.Text>
-                  <Form.Control type="text" placeholder="Search" />
-                </InputGroup>
-              </Form.Group>
-            </Form>
+          <div>
+            <div style={{ flexDirection: "row", display: "flex" }}>
+              <button
+                onClick={async () => {
+                  localStorage.setItem("language", "sq");
+                  window.location.reload();
+                }}
+                style={{
+                  marginRight: 10,
+                  height: 38,
+                  width: 100,
+                  border:
+                    localStorage.getItem("language") == "sq"
+                      ? "3 solid black"
+                      : 0,
+                }}
+              >
+                Sq
+              </button>
+              <button
+                onClick={async () => {
+                  await localStorage.setItem("language", "en");
+                  window.location.reload();
+                }}
+                style={{
+                  height: 38,
+                  width: 100,
+                  border:
+                    localStorage.getItem("language") == "en"
+                      ? "3 solid black"
+                      : 0,
+                }}
+              >
+                En
+              </button>
+            </div>
           </div>
+
           <Nav className="align-items-center">
             <Dropdown as={Nav.Item}>
               <Dropdown.Toggle as={Nav.Link} className="pt-1 px-0">
@@ -79,30 +114,14 @@ export default () => {
                 </div>
               </Dropdown.Toggle>
               <Dropdown.Menu className="user-dropdown dropdown-menu-right mt-2">
-                <Dropdown.Item className="fw-bold">
-                  <FontAwesomeIcon icon={faUserCircle} className="me-2" /> My
-                  Profile
-                </Dropdown.Item>
-                <Dropdown.Item className="fw-bold">
-                  <FontAwesomeIcon icon={faCog} className="me-2" /> Settings
-                </Dropdown.Item>
-                <Dropdown.Item className="fw-bold">
-                  <FontAwesomeIcon icon={faEnvelopeOpen} className="me-2" />{" "}
-                  Messages
-                </Dropdown.Item>
-                <Dropdown.Item className="fw-bold">
-                  <FontAwesomeIcon icon={faUserShield} className="me-2" />{" "}
-                  Support
-                </Dropdown.Item>
-
-                <Dropdown.Divider />
-
                 <Dropdown.Item onClick={handleLogout} className="fw-bold">
                   <FontAwesomeIcon
                     icon={faSignOutAlt}
                     className="text-danger me-2"
                   />
-                  Logout
+                  {localStorage.getItem("language") == "sq"
+                    ? "Qkyqu"
+                    : "Logout"}
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

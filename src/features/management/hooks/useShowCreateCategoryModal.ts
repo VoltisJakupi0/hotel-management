@@ -3,22 +3,22 @@ import { useCallback } from "react";
 import useShowModal from "../../modal/hooks/useShowModal";
 import { ModalTypes } from "../../modal/types";
 
-function useShowCreateStatusModal(): (payload?: {
+function useShowCreateCategoryModal(): (payload?: {
   id?: number;
-  status_name?: string;
+  category_name?: string;
 }) => void {
   const showModal = useShowModal();
 
-  const showCreateStatusModal = useCallback(
-    ({ id, status_name }) => {
+  const showCreateCategoryModal = useCallback(
+    ({ category_name, id }) => {
       const title =
         localStorage.getItem("language") == "sq"
-          ? "Krijo Statusin"
-          : "Create Status";
+          ? "Krijo Kategorine"
+          : "Create Category";
 
       const modalProps: ModalProps = {
         title,
-        width: "calc(100vw - 1300px)",
+        width: "calc(100vw - 1200px)",
         bodyStyle: {
           height: "190px",
         },
@@ -26,7 +26,7 @@ function useShowCreateStatusModal(): (payload?: {
 
       const data = {
         id,
-        status_name,
+        category_name,
       };
 
       const props: any = {
@@ -34,7 +34,7 @@ function useShowCreateStatusModal(): (payload?: {
       };
 
       showModal({
-        type: ModalTypes.CreateStatusModal,
+        type: ModalTypes.CreateCategoryModal,
         props,
         modalProps,
       });
@@ -42,7 +42,7 @@ function useShowCreateStatusModal(): (payload?: {
     [showModal]
   );
 
-  return showCreateStatusModal;
+  return showCreateCategoryModal;
 }
 
-export default useShowCreateStatusModal;
+export default useShowCreateCategoryModal;

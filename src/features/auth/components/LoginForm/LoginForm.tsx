@@ -31,14 +31,24 @@ function LoginForm({ onSubmit, loading }: LoginFormProps): ReactElement {
 
   return (
     <Spin spinning={loading}>
-      <Title level={2}>Hotel Management</Title>
-      <Title level={4}>Login</Title>
+      <Title level={2}>
+        {localStorage.getItem("language") == "sq"
+          ? "Menaxhimi i Hotelierise"
+          : "Hotel Management"}
+      </Title>
+      <Title level={4}>
+        {localStorage.getItem("language") == "sq" ? "Kyqja" : "Login"}
+      </Title>
       <Form<FormValues> form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item label="E-Mail" name={InputNames.Email} rules={generalRule}>
           <Input placeholder="E-Mail" />
         </Form.Item>
         <Form.Item
-          label="Password"
+          label={
+            localStorage.getItem("language") == "sq"
+              ? "Fjalekalimi"
+              : "Password"
+          }
           name={InputNames.Password}
           rules={generalRule}
         >

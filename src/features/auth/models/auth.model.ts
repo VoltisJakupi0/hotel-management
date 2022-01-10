@@ -33,4 +33,5 @@ export interface User {
   sites: Site[];
   slackEmail: string | null;
   technicianId: number;
+  role_id: number;
 }

@@ -50,7 +50,7 @@ export const Routes = {
 function MainRoutes(): ReactElement {
   return (
     <Switch>
-      <Route exact path="/" render={() => <Redirect to="/hotel" />} />
+      <Route exact path="/" render={() => <Redirect to="/rooms" />} />
     </Switch>
   );
 }

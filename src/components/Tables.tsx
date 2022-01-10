@@ -6,9 +6,9 @@ import {
   faEdit,
   faEllipsisH,
   faExternalLinkAlt,
-  faEye,
   faHotel,
   faPen,
+  faSearch,
   faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,14 +18,15 @@ import {
   Card,
   Col,
   Dropdown,
-  Image,
-  Nav,
-  Pagination,
-  ProgressBar,
+  Form,
+  InputGroup,
   Row,
+  Spinner,
   Table,
 } from "@themesberg/react-bootstrap";
-import React from "react";
+import dayjs from "dayjs";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import clients from "../data/clients";
 import {
@@ -40,7 +41,23 @@ import {
   status,
 } from "../data/tables";
 import users from "../data/users";
+import useShowCreateCategoryModal from "../features/management/hooks/useShowCreateCategoryModal";
+import useShowCreateRoomModal from "../features/management/hooks/useShowCreateRoomModal";
+import useShowCreateStatusModal from "../features/management/hooks/useShowCreateStatusModal";
+import useShowCreateUserModal from "../features/management/hooks/useShowCreateUserModal";
 import useShowReserveRoomModal from "../features/management/hooks/useShowReserveRoomModal";
+import {
+  useDeleteCategoryMutation,
+  useDeleteRoomMutation,
+  useDeleteStatusMutation,
+  useDeleteUserMutation,
+  useEditBookedRoomMutation,
+  useGetBookedRoomsQuery,
+  useGetCategoriesQuery,
+  useGetRoomsQuery,
+  useGetStatusQuery,
+  useGetUsersQuery,
+} from "../features/management/services/dashboardApi";
 import { Routes } from "../routes";
 
 const ValueChange = ({ value, suffix = "" }) => {
@@ -61,88 +78,258 @@ const ValueChange = ({ value, suffix = "" }) => {
 };
 
 export const CategoriesTable = () => {
+  const [data, setData] = useState<any>([]);
+  const [searchText, setSearchText] = useState<any>("");
+
+  const category = useGetCategoriesQuery();
+  const [removeCategory] = useDeleteCategoryMutation();
+  const editModal = useShowCreateCategoryModal();
+
+  const search = async (e) => {
+    const input = e.target.value;
+    const filtered = data.filter((item) => {
+      return (
+        item.id?.toString().includes(input?.toString()) ||
+        item.category_name
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase())
+      );
+    });
+    setSearchText(input);
+    setData(input ? filtered : category?.data);
+  };
+
+  useEffect(() => {
+    setData(category?.data);
+  }, [category]);
+
   const TableRow = (props) => {
-    const { id, categoryName } = props;
+    const { id, category_name } = props;
 
     return (
       <tr>
         <th scope="row">{id}</th>
-        <td>{categoryName}</td>
+        <td>{category_name}</td>
+        <td style={{ zIndex: 10000 }}>
+          <Dropdown alignment="top" as={ButtonGroup}>
+            <Dropdown.Toggle
+              as={Button}
+              split
+              variant="link"
+              className="text-dark m-0 p-0"
+            >
+              <span className="icon icon-sm">
+                <FontAwesomeIcon icon={faEllipsisH} className="icon-dark" />
+              </span>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item
+                onClick={() => {
+                  editModal({
+                    id,
+                    category_name,
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faEdit} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Edito" : "Edit"}
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  removeCategory(id).then(() => {
+                    category.refetch();
+                    setSearchText("");
+                  });
+                }}
+                className="text-danger"
+              >
+                <FontAwesomeIcon icon={faTrashAlt} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Fshij" : "Remove"}
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </td>
       </tr>
     );
   };
 
   return (
-    <Card border="light" className="shadow-sm">
-      <Card.Header>
-        <Row className="align-items-center">
-          <Col>
-            <h5>Page visits</h5>
-          </Col>
-          <Col className="text-end">
-            <Button variant="secondary" size="sm">
-              See all
-            </Button>
+    <>
+      <div className="table-settings mb-4">
+        <Row className="justify-content-between align-items-center">
+          <Col xs={8} md={6} lg={3} xl={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <FontAwesomeIcon icon={faSearch} />
+              </InputGroup.Text>
+              <Form.Control
+                value={searchText}
+                onChange={search}
+                type="text"
+                placeholder={
+                  localStorage.getItem("language") == "sq" ? "Kerko" : "Search"
+                }
+              />
+            </InputGroup>
           </Col>
         </Row>
-      </Card.Header>
-      <Table responsive className="align-items-center table-flush">
-        <thead className="thead-light">
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Category Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((pv) => (
-            <TableRow key={`page-visit-${pv.id}`} {...pv} />
-          ))}
-        </tbody>
-      </Table>
-    </Card>
+      </div>
+      <Card border="light">
+        {category.isLoading || category.isFetching ? (
+          <Spinner animation="border" />
+        ) : (
+          <Table responsive hover className="user-table align-items-center">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">
+                  {localStorage.getItem("language") == "sq"
+                    ? "Emri Kategorise"
+                    : "Category Name"}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.map((pv) => (
+                <TableRow key={`page-visit-${pv.id}`} {...pv} />
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card>
+    </>
   );
 };
 
 export const StatusTable = () => {
+  const [data, setData] = useState<any>([]);
+  const [searchText, setSearchText] = useState<any>("");
+
+  const status = useGetStatusQuery();
+  const editModal = useShowCreateStatusModal();
+
+  const [removeStatus] = useDeleteStatusMutation();
+
+  const search = async (e) => {
+    const input = e.target.value;
+    const filtered = data.filter((item) => {
+      return (
+        item.id?.toString().includes(input?.toString()) ||
+        item.status_name
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase())
+      );
+    });
+    setSearchText(input);
+    setData(input ? filtered : status?.data);
+  };
+
+  useEffect(() => {
+    setData(status?.data);
+  }, [status]);
+
   const TableRow = (props) => {
-    const { id, statusName } = props;
+    const { id, status_name } = props;
 
     return (
       <tr>
         <th scope="row">{id}</th>
-        <td>{statusName}</td>
+        <td>{status_name}</td>
+        <td style={{ zIndex: 10000 }}>
+          <Dropdown alignment="top" as={ButtonGroup}>
+            <Dropdown.Toggle
+              as={Button}
+              split
+              variant="link"
+              className="text-dark m-0 p-0"
+            >
+              <span className="icon icon-sm">
+                <FontAwesomeIcon icon={faEllipsisH} className="icon-dark" />
+              </span>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item
+                onClick={() => {
+                  editModal({
+                    id,
+                    status_name,
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faEdit} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Edito" : "Edit"}
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  removeStatus(id).then(() => {
+                    status.refetch();
+                    setSearchText("");
+                  });
+                }}
+                className="text-danger"
+              >
+                <FontAwesomeIcon icon={faTrashAlt} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Fshij" : "Remove"}
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </td>
       </tr>
     );
   };
 
   return (
-    <Card border="light" className="shadow-sm">
-      <Card.Header>
-        <Row className="align-items-center">
-          <Col>
-            <h5>Page visits</h5>
-          </Col>
-          <Col className="text-end">
-            <Button variant="secondary" size="sm">
-              See all
-            </Button>
+    <>
+      <div className="table-settings mb-4">
+        <Row className="justify-content-between align-items-center">
+          <Col xs={8} md={6} lg={3} xl={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <FontAwesomeIcon icon={faSearch} />
+              </InputGroup.Text>
+              <Form.Control
+                value={searchText}
+                onChange={search}
+                type="text"
+                placeholder={
+                  localStorage.getItem("language") == "sq" ? "Kerko" : "Search"
+                }
+              />
+            </InputGroup>
           </Col>
         </Row>
-      </Card.Header>
-      <Table responsive className="align-items-center table-flush">
-        <thead className="thead-light">
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Status Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {status.map((pv) => (
-            <TableRow key={`page-visit-${pv.id}`} {...pv} />
-          ))}
-        </tbody>
-      </Table>
-    </Card>
+      </div>
+      <Card border="light" className="shadow-sm">
+        {status.isLoading || status.isFetching ? (
+          <Spinner animation="border" />
+        ) : (
+          <Table
+            style={{ height: "100%" }}
+            hover
+            responsive
+            className="user-table align-items-center"
+          >
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">
+                  {localStorage.getItem("language") == "sq"
+                    ? "Emri Statusit"
+                    : "Status Name"}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.map((pv) => (
+                <TableRow key={`page-visit-${pv.id}`} {...pv} />
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card>
+    </>
   );
 };
 
@@ -182,7 +369,7 @@ export const PageVisitsTable = () => {
           </Col>
         </Row>
       </Card.Header>
-      <Table responsive className="align-items-center table-flush">
+      <Table hover className="user-table align-items-center">
         <thead className="thead-light">
           <tr>
             <th scope="col">Page name</th>
@@ -201,436 +388,59 @@ export const PageVisitsTable = () => {
   );
 };
 
-export const DesignersTable = () => {
-  const TableRow = (props) => {
-    const {
-      id,
-      name,
-      surname,
-      description,
-      category,
-      client,
-      taskName,
-      startDate,
-      endDate,
-      payment,
-    } = props;
-
-    return (
-      <tr>
-        <td>
-          <Card.Link href="#" className="text-primary fw-bold">
-            {id}
-          </Card.Link>
-        </td>
-        <td className="fw-bold">
-          {/* <FontAwesomeIcon
-            icon={sourceIcon}
-            className={`icon icon-xs text-${sourceIconColor} w-30`}
-          /> */}
-          {name}
-        </td>
-        <td>{surname}</td>
-        <td>{taskName}</td>
-        <td>{description}</td>
-        <td>{category ? category : "--"}</td>
-        <td>{client ? client : "--"}</td>
-        <td>{startDate ? startDate : "--"}</td>
-        <td>{endDate ? endDate : "--"}</td>
-        <td>{payment ? payment : "--"}</td>
-        {/* 
-        <td>
-          <Row className="d-flex align-items-center">
-            <Col xs={12} xl={2} className="px-0">
-              <small className="fw-bold">{difficulty}%</small>
-            </Col>
-            <Col xs={12} xl={10} className="px-0 px-xl-1">
-              <ProgressBar
-                variant="primary"
-                className="progress-lg mb-0"
-                now={difficulty}
-                min={0}
-                max={100}
-              />
-            </Col>
-          </Row>
-        </td> */}
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm mb-4">
-      <Card.Body className="pb-0">
-        <Table responsive className="table-centered table-nowrap rounded mb-0">
-          <thead className="thead-light">
-            <tr>
-              <th className="border-0">#</th>
-              <th className="border-0">Name</th>
-              <th className="border-0">Surname</th>
-              <th className="border-0">Task Name</th>
-              <th className="border-0">Description</th>
-              <th className="border-0">Category</th>
-              <th className="border-0">Client</th>
-              <th className="border-0">Start Date</th>
-              <th className="border-0">End Date</th>
-              <th className="border-0">Payment</th>
-              {/* <th className="border-0">Difficulty</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {designersTasks.map((pt) => (
-              <TableRow key={`page-traffic-${pt.id}`} {...pt} />
-            ))}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
-  );
-};
-
-export const SocialMediaTable = () => {
-  const TableRow = (props) => {
-    const {
-      id,
-      name,
-      surname,
-      taskName,
-      description,
-      category,
-      client,
-      startDate,
-      payment,
-      endDate,
-    } = props;
-
-    return (
-      <tr>
-        <td>
-          <Card.Link href="#" className="text-primary fw-bold">
-            {id}
-          </Card.Link>
-        </td>
-        <td className="fw-bold">
-          {/* <FontAwesomeIcon
-            icon={sourceIcon}
-            className={`icon icon-xs text-${sourceIconColor} w-30`}
-          /> */}
-          {name}
-        </td>
-        <td>{surname}</td>
-        <td>{taskName}</td>
-        <td>{description}</td>
-        <td>{category ? category : "--"}</td>
-        <td>{client ? client : "--"}</td>
-        <td>{startDate ? startDate : "--"}</td>
-        <td>{endDate ? endDate : "--"}</td>
-        <td>{payment ? payment : "--"}</td>
-        {/* <td>
-          <Row className="d-flex align-items-center">
-            <Col xs={12} xl={2} className="px-0">
-              <small className="fw-bold">{difficulty}%</small>
-            </Col>
-            <Col xs={12} xl={10} className="px-0 px-xl-1">
-              <ProgressBar
-                variant="primary"
-                className="progress-lg mb-0"
-                now={difficulty}
-                min={0}
-                max={100}
-              />
-            </Col>
-          </Row>
-        </td> */}
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm mb-4">
-      <Card.Body className="pb-0">
-        <Table responsive className="table-centered table-nowrap rounded mb-0">
-          <thead className="thead-light">
-            <tr>
-              <th className="border-0">#</th>
-              <th className="border-0">Name</th>
-              <th className="border-0">Surname</th>
-              <th className="border-0">Task Name</th>
-              <th className="border-0">Description</th>
-              <th className="border-0">Category</th>
-              <th className="border-0">Client</th>
-              <th className="border-0">Start Date</th>
-              <th className="border-0">End Date</th>
-              <th className="border-0">Payment</th>
-            </tr>
-          </thead>
-          <tbody>
-            {socialMediaTasks.map((pt) => (
-              <TableRow key={`page-traffic-${pt.id}`} {...pt} />
-            ))}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
-  );
-};
-
-export const MyTasks = () => {
-  const TableRow = (props) => {
-    const {
-      id,
-      taskName,
-      description,
-      category,
-      client,
-      startDate,
-      payment,
-      endDate,
-      difficulty,
-    } = props;
-
-    return (
-      <tr>
-        <td>
-          <Card.Link href="#" className="text-primary fw-bold">
-            {id}
-          </Card.Link>
-        </td>
-        <td>{taskName}</td>
-        <td>{description}</td>
-        <td>{category ? category : "--"}</td>
-        <td>{client ? client : "--"}</td>
-        <td>{startDate ? startDate : "--"}</td>
-        <td>{endDate ? endDate : "--"}</td>
-        <td>{payment ? payment : "--"}</td>
-        <td>
-          <Row className="d-flex align-items-center">
-            <Col xs={12} xl={2} className="px-0">
-              <small className="fw-bold">{difficulty}%</small>
-            </Col>
-            <Col xs={12} xl={10} className="px-0 px-xl-1">
-              <ProgressBar
-                variant="primary"
-                className="progress-lg mb-0"
-                now={difficulty}
-                min={0}
-                max={100}
-              />
-            </Col>
-          </Row>
-        </td>
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm mb-4">
-      <Card.Body className="pb-0">
-        <Table responsive className="table-centered table-nowrap rounded mb-0">
-          <thead className="thead-light">
-            <tr>
-              <th className="border-0">#</th>
-              <th className="border-0">Task Name</th>
-              <th className="border-0">Description</th>
-              <th className="border-0">Category</th>
-              <th className="border-0">Client</th>
-              <th className="border-0">Start Date</th>
-              <th className="border-0">End Date</th>
-              <th className="border-0">Payment</th>
-              <th className="border-0">Difficulty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {myTasks.map((pt) => (
-              <TableRow key={`page-traffic-${pt.id}`} {...pt} />
-            ))}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
-  );
-};
-
-export const RankingTable = () => {
-  const TableRow = (props) => {
-    const {
-      country,
-      countryImage,
-      overallRank,
-      overallRankChange,
-      travelRank,
-      travelRankChange,
-      widgetsRank,
-      widgetsRankChange,
-    } = props;
-
-    return (
-      <tr>
-        <td className="border-0">
-          <Card.Link href="#" className="d-flex align-items-center">
-            <Image
-              src={countryImage}
-              className="image-small rounded-circle me-2"
-            />
-            <div>
-              <span className="h6">{country}</span>
-            </div>
-          </Card.Link>
-        </td>
-        <td className="fw-bold border-0">{overallRank ? overallRank : "-"}</td>
-        <td className="border-0">
-          <ValueChange value={overallRankChange} />
-        </td>
-        <td className="fw-bold border-0">{travelRank ? travelRank : "-"}</td>
-        <td className="border-0">
-          <ValueChange value={travelRankChange} />
-        </td>
-        <td className="fw-bold border-0">{widgetsRank ? widgetsRank : "-"}</td>
-        <td className="border-0">
-          <ValueChange value={widgetsRankChange} />
-        </td>
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm">
-      <Card.Body className="pb-0">
-        <Table responsive className="table-centered table-nowrap rounded mb-0">
-          <thead className="thead-light">
-            <tr>
-              <th className="border-0">Country</th>
-              <th className="border-0">All</th>
-              <th className="border-0">All Change</th>
-              <th className="border-0">Travel & Local</th>
-              <th className="border-0">Travel & Local Change</th>
-              <th className="border-0">Widgets</th>
-              <th className="border-0">Widgets Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pageRanking.map((r) => (
-              <TableRow key={`ranking-${r.id}`} {...r} />
-            ))}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
-  );
-};
-
-export const ClientsTable = () => {
-  const totalClients = clients.length;
-
-  const TableRow = (props) => {
-    const { name, surname, musicname, contractdate, id, status } = props;
-    const statusVariant =
-      status === "Active"
-        ? "success"
-        : status === "Due"
-        ? "warning"
-        : status === "Canceled"
-        ? "danger"
-        : "primary";
-
-    return (
-      <tr>
-        <td>
-          <Card.Link as={Link} to={Routes.Invoice.path} className="fw-normal">
-            {id}
-          </Card.Link>
-        </td>
-        <td>
-          <span className="fw-normal">{name}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{surname}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{musicname}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{contractdate}</span>
-        </td>
-        <td>
-          <span className={`fw-normal text-${statusVariant}`}>{status}</span>
-        </td>
-        <td>
-          <Dropdown as={ButtonGroup}>
-            <Dropdown.Toggle
-              as={Button}
-              split
-              variant="link"
-              className="text-dark m-0 p-0"
-            >
-              <span className="icon icon-sm">
-                <FontAwesomeIcon icon={faEllipsisH} className="icon-dark" />
-              </span>
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faEye} className="me-2" /> View Details
-              </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faEdit} className="me-2" /> Edit
-              </Dropdown.Item>
-              <Dropdown.Item className="text-danger">
-                <FontAwesomeIcon icon={faTrashAlt} className="me-2" /> Remove
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </td>
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="table-wrapper table-responsive shadow-sm">
-      <Card.Body className="pt-0">
-        <Table hover className="user-table align-items-center">
-          <thead>
-            <tr>
-              <th className="border-bottom">ID</th>
-              <th className="border-bottom">Name</th>
-              <th className="border-bottom">Surname</th>
-              <th className="border-bottom">Music Name</th>
-              <th className="border-bottom">Contract Date</th>
-              <th className="border-bottom">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((t) => (
-              <TableRow key={`${t.id}`} {...t} />
-            ))}
-          </tbody>
-        </Table>
-        <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-          <Nav>
-            <Pagination className="mb-2 mb-lg-0">
-              <Pagination.Prev>Previous</Pagination.Prev>
-              <Pagination.Item active>1</Pagination.Item>
-              <Pagination.Item>2</Pagination.Item>
-              <Pagination.Item>3</Pagination.Item>
-              <Pagination.Item>4</Pagination.Item>
-              <Pagination.Item>5</Pagination.Item>
-              <Pagination.Next>Next</Pagination.Next>
-            </Pagination>
-          </Nav>
-          <small className="fw-bold">
-            Showing <b>{totalClients}</b> out of <b>25</b> entries
-          </small>
-        </Card.Footer>
-      </Card.Body>
-    </Card>
-  );
-};
-
 export const RoomsTable = () => {
   const showReservationModal = useShowReserveRoomModal();
-  const totalClients = rooms.length;
+
+  const editModal = useShowCreateRoomModal();
+
+  const [data, setData] = useState<any>([]);
+  const [searchText, setSearchText] = useState<string>("");
+
+  const rooms = useGetRoomsQuery();
+
+  const [removeRoom] = useDeleteRoomMutation();
+
+  const search = async (e) => {
+    const input = e.target.value;
+    const filtered = data.filter((item) => {
+      return (
+        item.room_price?.toString().includes(input?.toString()) ||
+        item.room_number
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.id
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.statusName
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.categoryName
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase())
+      );
+    });
+    setSearchText(input);
+    setData(input ? filtered : rooms?.data);
+  };
+
+  useEffect(() => {
+    setData(rooms?.data);
+  }, [rooms]);
 
   const TableRow = (props) => {
-    const { clientNr, price, roomNr, category, id, status } = props;
+    const {
+      room_price,
+      room_number,
+      category_id,
+      status_id,
+      categoryName,
+      id,
+      statusName,
+    } = props;
 
     return (
       <tr>
@@ -640,19 +450,17 @@ export const RoomsTable = () => {
           </Card.Link>
         </td>
         <td>
-          <span className="fw-normal">{roomNr}</span>
+          <span className="fw-normal">{room_number}</span>
+        </td>
+
+        <td>
+          <span className="fw-normal">{categoryName}</span>
         </td>
         <td>
-          <span className="fw-normal">{clientNr}</span>
+          <span className="fw-normal">{statusName}</span>
         </td>
         <td>
-          <span className="fw-normal">{category}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{status}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{price}</span>
+          <span className="fw-normal">{room_price}$</span>
         </td>
         <td>
           <Dropdown as={ButtonGroup}>
@@ -667,14 +475,35 @@ export const RoomsTable = () => {
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Item onClick={showReservationModal}>
-                <FontAwesomeIcon icon={faHotel} className="me-2" /> Book
+              <Dropdown.Item onClick={() => showReservationModal({ id })}>
+                <FontAwesomeIcon icon={faHotel} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Rezervo" : "Book"}
               </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faEdit} className="me-2" /> Edit
+              <Dropdown.Item
+                onClick={() => {
+                  editModal({
+                    id,
+                    room_price,
+                    room_number,
+                    category_id,
+                    status_id,
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faEdit} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Edito" : "Edit"}
               </Dropdown.Item>
-              <Dropdown.Item className="text-danger">
-                <FontAwesomeIcon icon={faTrashAlt} className="me-2" /> Remove
+              <Dropdown.Item
+                onClick={() => {
+                  removeRoom(id).then(() => {
+                    rooms.refetch();
+                    setSearchText("");
+                  });
+                }}
+                className="text-danger"
+              >
+                <FontAwesomeIcon icon={faTrashAlt} className="me-2" />{" "}
+                {localStorage.getItem("language") == "sq" ? "Fshije" : "Remove"}
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
@@ -684,59 +513,129 @@ export const RoomsTable = () => {
   };
 
   return (
-    <Card border="light" className="table-wrapper table-responsive shadow-sm">
-      <Card.Body className="pt-0">
-        <Table hover className="user-table align-items-center">
-          <thead>
-            <tr>
-              <th className="border-bottom">ID</th>
-              <th className="border-bottom">Room Number</th>
-              <th className="border-bottom">Client Max limit</th>
-              <th className="border-bottom">Category</th>
-              <th className="border-bottom">Status</th>
-              <th className="border-bottom">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rooms.map((t) => (
-              <TableRow key={`${t.id}`} {...t} />
-            ))}
-          </tbody>
-        </Table>
-        <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-          <Nav>
-            <Pagination className="mb-2 mb-lg-0">
-              <Pagination.Prev>Previous</Pagination.Prev>
-              <Pagination.Item active>1</Pagination.Item>
-              <Pagination.Item>2</Pagination.Item>
-              <Pagination.Item>3</Pagination.Item>
-              <Pagination.Item>4</Pagination.Item>
-              <Pagination.Item>5</Pagination.Item>
-              <Pagination.Next>Next</Pagination.Next>
-            </Pagination>
-          </Nav>
-          <small className="fw-bold">
-            Showing <b>{totalClients}</b> out of <b>25</b> entries
-          </small>
-        </Card.Footer>
-      </Card.Body>
-    </Card>
+    <>
+      <div className="table-settings mb-4">
+        <Row className="justify-content-between align-items-center">
+          <Col xs={8} md={6} lg={3} xl={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <FontAwesomeIcon icon={faSearch} />
+              </InputGroup.Text>
+              <Form.Control
+                value={searchText}
+                onChange={search}
+                type="text"
+                placeholder={
+                  localStorage.getItem("language") == "sq" ? "Kerko" : "Search"
+                }
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+      </div>
+      <Card border="light" className="table-wrapper table-responsive shadow-sm">
+        <Card.Body className="pt-0">
+          {rooms.isLoading || rooms.isFetching ? (
+            <Spinner animation="border" />
+          ) : (
+            <Table hover className="user-table align-items-center">
+              <thead>
+                <tr>
+                  <th className="border-bottom">ID</th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Numri Dhomes"
+                      : "Room Number"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Kategoria "
+                      : "Category"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Statusi"
+                      : "Status"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Qmimi"
+                      : "Price"}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.map((t) => (
+                  <TableRow key={`${t.id}`} {...t} />
+                ))}
+              </tbody>
+            </Table>
+          )}
+          <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between"></Card.Footer>
+        </Card.Body>
+      </Card>
+    </>
   );
 };
 
 export const ReservationsTable = () => {
-  const totalClients = reservations.length;
+  const [data, setData] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const bookedrooms = useGetBookedRoomsQuery();
+  const [cancelReservation] = useEditBookedRoomMutation();
+  const editModal = useShowReserveRoomModal();
+
+  useEffect(() => {
+    setData(bookedrooms?.data);
+  }, [bookedrooms]);
+
+  const search = async (e) => {
+    const input = e.target.value;
+    const filtered = data.filter((item) => {
+      return (
+        item.client_name?.toString().includes(input?.toString()) ||
+        item.client_surname
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.room_number
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.entry_date?.toString().includes(input?.toString()) ||
+        item.leave_date
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.client_email
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase())
+      );
+    });
+    setSearchText(input);
+    setData(input ? filtered : bookedrooms?.data);
+  };
 
   const TableRow = (props) => {
     const {
-      clientName,
-      clientSurname,
-      clientEmail,
-      roomNr,
-      reservationDate,
-      endReservationDate,
+      client_name,
+      client_surname,
+      client_email,
+      room_id,
+      room_price,
+      entry_date,
+      leave_date,
+      client_personal_number,
+      room_number,
       id,
+      status,
     } = props;
+
+    const leave = moment(leave_date, "DD-MM-YYYY");
+    const entry = moment(entry_date, "DD-MM-YYYY");
+
+    const difference = leave.diff(entry, "days");
 
     return (
       <tr>
@@ -746,22 +645,33 @@ export const ReservationsTable = () => {
           </Card.Link>
         </td>
         <td>
-          <span className="fw-normal">{roomNr}</span>
+          <span className="fw-normal">{room_number}</span>
         </td>
         <td>
-          <span className="fw-normal">{clientName}</span>
+          <span className="fw-normal">{client_name}</span>
         </td>
         <td>
-          <span className="fw-normal">{clientSurname}</span>
+          <span className="fw-normal">{client_surname}</span>
         </td>
         <td>
-          <span className="fw-normal">{clientEmail}</span>
+          <span className="fw-normal">{client_email}</span>
         </td>
         <td>
-          <span className="fw-normal">{reservationDate}</span>
+          <span className="fw-normal">{client_personal_number}</span>
         </td>
         <td>
-          <span className="fw-normal">{endReservationDate}</span>
+          <span className="fw-normal">{entry_date}</span>
+        </td>
+        <td>
+          <span className="fw-normal">{leave_date}</span>
+        </td>
+        <td>
+          <span className="fw-normal">{difference * room_price}$</span>
+        </td>
+        <td>
+          <span className="fw-normal">
+            {moment(leave_date) < moment() ? "FINISHED" : status}
+          </span>
         </td>
         <td>
           <Dropdown as={ButtonGroup}>
@@ -776,12 +686,52 @@ export const ReservationsTable = () => {
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faHotel} className="me-2" /> Cancel
-                Reservation
+              <Dropdown.Item
+                onClick={() => {
+                  const payload = {
+                    status: "CANCELED",
+                    client_name,
+                    client_surname,
+                    client_email,
+                    room_id,
+                    room_price,
+                    entry_date,
+                    leave_date,
+                    client_personal_number,
+                    room_number,
+                    id,
+                  };
+
+                  cancelReservation({ payload, id }).then(() => {
+                    bookedrooms.refetch();
+                    setSearchText("");
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faHotel} className="me-2" />
+                {localStorage.getItem("language") == "sq"
+                  ? "Anulo Rezervimin"
+                  : "Cancel Reservation"}
               </Dropdown.Item>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faPen} className="me-2" /> Edit
+              <Dropdown.Item
+                onClick={() =>
+                  editModal({
+                    client_name,
+                    client_surname,
+                    client_email,
+                    room_id,
+                    room_price,
+                    entry_date,
+                    leave_date,
+                    client_personal_number,
+                    room_number,
+                    id,
+                    status,
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faPen} className="me-2" />
+                {localStorage.getItem("language") == "sq" ? "Edito" : "Edit"}
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
@@ -791,52 +741,146 @@ export const ReservationsTable = () => {
   };
 
   return (
-    <Card border="light" className="table-wrapper table-responsive shadow-sm">
-      <Card.Body className="pt-0">
-        <Table hover className="user-table align-items-center">
-          <thead>
-            <tr>
-              <th className="border-bottom">ID</th>
-              <th className="border-bottom">Room Number</th>
-              <th className="border-bottom">Client Name</th>
-              <th className="border-bottom">Client Surname</th>
-              <th className="border-bottom">Client Email</th>
-              <th className="border-bottom">Reservation Date</th>
-              <th className="border-bottom">Leave Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((t) => (
-              <TableRow key={`${t.id}`} {...t} />
-            ))}
-          </tbody>
-        </Table>
-        <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-          <Nav>
-            <Pagination className="mb-2 mb-lg-0">
-              <Pagination.Prev>Previous</Pagination.Prev>
-              <Pagination.Item active>1</Pagination.Item>
-              <Pagination.Item>2</Pagination.Item>
-              <Pagination.Item>3</Pagination.Item>
-              <Pagination.Item>4</Pagination.Item>
-              <Pagination.Item>5</Pagination.Item>
-              <Pagination.Next>Next</Pagination.Next>
-            </Pagination>
-          </Nav>
-          <small className="fw-bold">
-            Showing <b>{totalClients}</b> out of <b>25</b> entries
-          </small>
-        </Card.Footer>
-      </Card.Body>
-    </Card>
+    <>
+      <div className="table-settings mb-4">
+        <Row className="justify-content-between align-items-center">
+          <Col xs={8} md={6} lg={3} xl={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <FontAwesomeIcon icon={faSearch} />
+              </InputGroup.Text>
+              <Form.Control
+                value={searchText}
+                onChange={search}
+                type="text"
+                placeholder={
+                  localStorage.getItem("language") == "sq" ? "Kerko" : "Search"
+                }
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+      </div>
+      <Card border="light" className="table-wrapper table-responsive shadow-sm">
+        <Card.Body className="pt-0">
+          {bookedrooms?.isLoading || bookedrooms.isFetching ? (
+            <Spinner animation="border" />
+          ) : (
+            <Table hover className="user-table align-items-center">
+              <thead>
+                <tr>
+                  <th className="border-bottom">ID</th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Nr Dhomes"
+                      : "Room Number"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Emri Klientit"
+                      : "Client Name"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Mbiemri Klientit"
+                      : "Client Surname"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Emaili i Klientit"
+                      : "Client Email"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Numri Personal i Klientit"
+                      : "Client Personal Number"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Data e Rezervimit"
+                      : "Reservation Date"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Data e Leshimit"
+                      : "Leave Date"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Qmimi Total"
+                      : "Total Price"}
+                  </th>
+                  <th className="border-bottom">
+                    {" "}
+                    {localStorage.getItem("language") == "sq"
+                      ? "Statusi"
+                      : "Status"}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.map((t) => (
+                  <TableRow key={`${t.id}`} {...t} />
+                ))}
+              </tbody>
+            </Table>
+          )}
+          <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between"></Card.Footer>
+        </Card.Body>
+      </Card>
+    </>
   );
 };
 
 export const UsersTable = () => {
-  const totalUsers = users.length;
+  const [data, setData] = useState<any>([]);
+  const [removeUser] = useDeleteUserMutation();
+  const [searchText, setSearchText] = useState<any>([]);
+  const editModal = useShowCreateUserModal();
+
+  const users = useGetUsersQuery();
+
+  const search = async (e) => {
+    const input = e.target.value;
+    const filtered = data.filter((item) => {
+      return (
+        item.id?.toString().includes(input?.toString()) ||
+        item.first_name
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        "Admin".includes(input?.toString()) ||
+        "Perdorues Bazik".includes(input?.toString()) ||
+        item.surname?.toString().includes(input?.toString()) ||
+        item.email
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase()) ||
+        item.surname?.toString().includes(input?.toString()) ||
+        item.username
+          ?.toString()
+          ?.toLowerCase()
+          .includes(input?.toString()?.toLowerCase())
+      );
+    });
+    setSearchText(input);
+    setData(input ? filtered : users?.data);
+  };
+
+  useEffect(() => {
+    setData(users?.data);
+  }, [users]);
 
   const TableRow = (props) => {
-    const { name, surname, datebirth, role, id, email, password } = props;
+    const {
+      first_name,
+      surname,
+      role_id,
+      id,
+      email,
+      username,
+      personal_number,
+    } = props;
 
     return (
       <tr>
@@ -846,7 +890,7 @@ export const UsersTable = () => {
           </Card.Link>
         </td>
         <td>
-          <span className="fw-normal">{name}</span>
+          <span className="fw-normal">{first_name}</span>
         </td>
         <td>
           <span className="fw-normal">{surname}</span>
@@ -854,14 +898,20 @@ export const UsersTable = () => {
         <td>
           <span className="fw-normal">{email}</span>
         </td>
+        {/* <td>
+          <span className="fw-normal">{passwd}</span>
+        </td> */}
         <td>
-          <span className="fw-normal">{password}</span>
+          <span className="fw-normal">{username.split("@")[0]}</span>
+        </td>
+
+        <td>
+          <span className="fw-normal">
+            {role_id == "3" ? "Perdorues Bazik" : "Admin"}
+          </span>
         </td>
         <td>
-          <span className="fw-normal">{datebirth}</span>
-        </td>
-        <td>
-          <span className="fw-normal">{role}</span>
+          <span className="fw-normal">{personal_number}</span>
         </td>
         <td>
           <Dropdown as={ButtonGroup}>
@@ -876,13 +926,30 @@ export const UsersTable = () => {
               </span>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Item>
-                <FontAwesomeIcon icon={faEye} className="me-2" /> View Details
-              </Dropdown.Item>
-              <Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  editModal({
+                    first_name,
+                    surname,
+                    role_id,
+                    id,
+                    email,
+                    username,
+                    personal_number,
+                  });
+                }}
+              >
                 <FontAwesomeIcon icon={faEdit} className="me-2" /> Edit
               </Dropdown.Item>
-              <Dropdown.Item className="text-danger">
+              <Dropdown.Item
+                onClick={() => {
+                  removeUser(id).then(() => {
+                    users.refetch();
+                    setSearchText("");
+                  });
+                }}
+                className="text-danger"
+              >
                 <FontAwesomeIcon icon={faTrashAlt} className="me-2" /> Remove
               </Dropdown.Item>
             </Dropdown.Menu>
@@ -893,111 +960,74 @@ export const UsersTable = () => {
   };
 
   return (
-    <Card border="light" className="table-wrapper table-responsive shadow-sm">
-      <Card.Body className="pt-0">
-        <Table hover className="user-table align-items-center">
-          <thead>
-            <tr>
-              <th className="border-bottom">ID</th>
-              <th className="border-bottom">Name</th>
-              <th className="border-bottom">Surname</th>
-              <th className="border-bottom">Email</th>
-              <th className="border-bottom">Password</th>
-              <th className="border-bottom">DateBirth</th>
-              <th className="border-bottom">Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((t) => (
-              <TableRow key={`${t.id}`} {...t} />
-            ))}
-          </tbody>
-        </Table>
-        <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between">
-          <Nav>
-            <Pagination className="mb-2 mb-lg-0">
-              <Pagination.Prev>Previous</Pagination.Prev>
-              <Pagination.Item active>1</Pagination.Item>
-              <Pagination.Item>2</Pagination.Item>
-              <Pagination.Item>3</Pagination.Item>
-              <Pagination.Item>4</Pagination.Item>
-              <Pagination.Item>5</Pagination.Item>
-              <Pagination.Next>Next</Pagination.Next>
-            </Pagination>
-          </Nav>
-          <small className="fw-bold">
-            Showing <b>{totalUsers}</b> out of <b>25</b> entries
-          </small>
-        </Card.Footer>
-      </Card.Body>
-    </Card>
-  );
-};
-
-export const CommandsTable = () => {
-  const TableRow = (props) => {
-    const { name, usage = [], description, link } = props;
-
-    return (
-      <tr>
-        <td className="border-0" style={{ width: "5%" }}>
-          <code>{name}</code>
-        </td>
-        <td className="fw-bold border-0" style={{ width: "5%" }}>
-          <ul className="ps-0">
-            {usage.map((u) => (
-              <ol key={u} className="ps-0">
-                <code>{u}</code>
-              </ol>
-            ))}
-          </ul>
-        </td>
-        <td className="border-0" style={{ width: "50%" }}>
-          <pre className="m-0 p-0">{description}</pre>
-        </td>
-        <td className="border-0" style={{ width: "40%" }}>
-          <pre>
-            <Card.Link href={link} target="_blank">
-              Read More{" "}
-              <FontAwesomeIcon icon={faExternalLinkAlt} className="ms-1" />
-            </Card.Link>
-          </pre>
-        </td>
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm">
-      <Card.Body className="p-0">
-        <Table
-          responsive
-          className="table-centered rounded"
-          style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}
-        >
-          <thead className="thead-light">
-            <tr>
-              <th className="border-0" style={{ width: "5%" }}>
-                Name
-              </th>
-              <th className="border-0" style={{ width: "5%" }}>
-                Usage
-              </th>
-              <th className="border-0" style={{ width: "50%" }}>
-                Description
-              </th>
-              <th className="border-0" style={{ width: "40%" }}>
-                Extra
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* {commands.map((c) => (
-              <TableRow key={`command-${c.id}`} {...c} />
-            ))} */}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
+    <>
+      <div className="table-settings mb-4">
+        <Row className="justify-content-between align-items-center">
+          <Col xs={8} md={6} lg={3} xl={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <FontAwesomeIcon icon={faSearch} />
+              </InputGroup.Text>
+              <Form.Control
+                value={searchText}
+                onChange={search}
+                type="text"
+                placeholder={
+                  localStorage.getItem("language") == "sq" ? "Kerko" : "Search"
+                }
+              />
+            </InputGroup>
+          </Col>
+        </Row>
+      </div>
+      <Card border="light" className="table-wrapper table-responsive shadow-sm">
+        <Card.Body className="pt-0">
+          {users.isLoading || users.isFetching ? (
+            <Spinner animation="border" />
+          ) : (
+            <Table hover className="user-table align-items-center">
+              <thead>
+                <tr>
+                  <th className="border-bottom">ID</th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq" ? "Emri" : "Name"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Mbiemri"
+                      : "Surname"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Email-i"
+                      : "Email"}
+                  </th>
+                  {/* <th className="border-bottom">Password</th> */}
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Emri i Perdoruesit"
+                      : "Username"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq" ? "Roli" : "Role"}
+                  </th>
+                  <th className="border-bottom">
+                    {localStorage.getItem("language") == "sq"
+                      ? "Nr Personal"
+                      : "Personal Number"}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.map((t) => (
+                  <TableRow key={`${t.id}`} {...t} />
+                ))}
+              </tbody>
+            </Table>
+          )}
+          <Card.Footer className="px-3 border-0 d-lg-flex align-items-center justify-content-between"></Card.Footer>
+        </Card.Body>
+      </Card>
+    </>
   );
 };

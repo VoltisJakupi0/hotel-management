@@ -3,13 +3,9 @@ import { useSelector } from "react-redux";
 import { authUserSelector } from "../selectors/auth.selectors";
 
 function useHasRole(role: string): boolean {
-  const authUser = useSelector(authUserSelector);
+  const authUser: any = useSelector(authUserSelector);
 
-  // const hasRole = useMemo<boolean>(() => {
-  //   return !!authUser && authUser.roles.some((r) => r.name === role)
-  // }, [authUser, role])
-
-  return false;
+  return authUser?.data?.user?.role_id == 3 ? false : true;
 }
 
 export default useHasRole;

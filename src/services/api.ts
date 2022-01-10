@@ -5,7 +5,9 @@ import {
 } from "../constants";
 
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: `${apiEndpoint}/` }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${apiEndpoint}/api/`,
+  }),
   endpoints: () => ({}),
 });
 

@@ -28,19 +28,6 @@ import dayjs from "dayjs";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import clients from "../data/clients";
-import {
-  categories,
-  designersTasks,
-  myTasks,
-  pageRanking,
-  pageVisits,
-  reservations,
-  rooms,
-  socialMediaTasks,
-  status,
-} from "../data/tables";
-import users from "../data/users";
 import useShowCreateCategoryModal from "../features/management/hooks/useShowCreateCategoryModal";
 import useShowCreateRoomModal from "../features/management/hooks/useShowCreateRoomModal";
 import useShowCreateStatusModal from "../features/management/hooks/useShowCreateStatusModal";
@@ -59,23 +46,6 @@ import {
   useGetUsersQuery,
 } from "../features/management/services/dashboardApi";
 import { Routes } from "../routes";
-
-const ValueChange = ({ value, suffix = "" }) => {
-  const valueIcon = value < 0 ? faAngleDown : faAngleUp;
-  const valueTxtColor = value < 0 ? "text-danger" : "text-success";
-
-  return value ? (
-    <span className={valueTxtColor}>
-      <FontAwesomeIcon icon={valueIcon} />
-      <span className="fw-bold ms-1">
-        {Math.abs(value)}
-        {suffix}
-      </span>
-    </span>
-  ) : (
-    <span>"--"</span>
-  );
-};
 
 export const CategoriesTable = () => {
   const [data, setData] = useState<any>([]);
@@ -330,61 +300,6 @@ export const StatusTable = () => {
         )}
       </Card>
     </>
-  );
-};
-
-export const PageVisitsTable = () => {
-  const TableRow = (props) => {
-    const { pageName, views, returnValue, bounceRate } = props;
-    const bounceIcon = bounceRate < 0 ? faArrowDown : faArrowUp;
-    const bounceTxtColor = bounceRate < 0 ? "text-danger" : "text-success";
-
-    return (
-      <tr>
-        <th scope="row">{pageName}</th>
-        <td>{views}</td>
-        <td>${returnValue}</td>
-        <td>
-          <FontAwesomeIcon
-            icon={bounceIcon}
-            className={`${bounceTxtColor} me-3`}
-          />
-          {Math.abs(bounceRate)}%
-        </td>
-      </tr>
-    );
-  };
-
-  return (
-    <Card border="light" className="shadow-sm">
-      <Card.Header>
-        <Row className="align-items-center">
-          <Col>
-            <h5>Page visits</h5>
-          </Col>
-          <Col className="text-end">
-            <Button variant="secondary" size="sm">
-              See all
-            </Button>
-          </Col>
-        </Row>
-      </Card.Header>
-      <Table hover className="user-table align-items-center">
-        <thead className="thead-light">
-          <tr>
-            <th scope="col">Page name</th>
-            <th scope="col">Page Views</th>
-            <th scope="col">Page Value</th>
-            <th scope="col">Bounce rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pageVisits.map((pv) => (
-            <TableRow key={`page-visit-${pv.id}`} {...pv} />
-          ))}
-        </tbody>
-      </Table>
-    </Card>
   );
 };
 

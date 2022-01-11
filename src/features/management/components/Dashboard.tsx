@@ -1,25 +1,4 @@
-import { faCashRegister, faChartLine } from "@fortawesome/free-solid-svg-icons";
-import {
-  Button,
-  ButtonGroup,
-  Col,
-  Dropdown,
-  Row,
-} from "@themesberg/react-bootstrap";
 import React from "react";
-import { PageVisitsTable } from "../../../components/Tables";
-import {
-  AcquisitionWidget,
-  BarChartWidget,
-  CircleChartWidget,
-  CounterWidget,
-  ProgressTrackWidget,
-  RankingWidget,
-  SalesValueWidget,
-  SalesValueWidgetPhone,
-  TeamMembersWidget,
-} from "../../../components/Widgets";
-import { totalOrders, trafficShares } from "../../../data/charts";
 
 export default () => {
   const language = localStorage.getItem("language");

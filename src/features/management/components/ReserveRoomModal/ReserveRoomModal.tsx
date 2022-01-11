@@ -64,14 +64,14 @@ function ReserveRoomModal({ data }: any): ReactElement {
 
   useEffect(() => {
     if (isEdit && data.client_name) {
-      console.log(data);
+      console.log(moment(data.leave_date, "DD-MM-YYYY"));
       form.setFieldsValue({
         client_name: data.client_name,
         client_surname: data.client_surname,
         client_email: data.client_email,
         client_personal_number: data.client_personal_number,
-        entry_date: moment(data?.entry_date),
-        leave_date: moment(data?.leave_date),
+        entry_date: moment(data.entry_date, "DD-MM-YYYY"),
+        leave_date: moment(data.leave_date, "DD-MM-YYYY"),
       });
     }
   }, [isEdit]);

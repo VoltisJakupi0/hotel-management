@@ -53,11 +53,11 @@ function LoginPage(): ReactElement {
   return (
     <>
       <Row className={styles.loginRow} justify="start">
-        <Col span={15}>
-          <Image height={945} width={1200} src={img} />
+        <Col span={17}>
+          <Image height={945} width={1050} src={img} />
         </Col>
 
-        <Col className={styles.loginFormCard} span={9}>
+        <Col className={styles.loginFormCard} span={5}>
           <Col>
             <div
               style={{

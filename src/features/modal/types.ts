@@ -6,6 +6,7 @@ export enum ModalTypes {
   CreateStatusModal = "CreateStatusModal",
   CreateRoomModal = "CreateRoomModal",
   ReserveRoomModal = "ReserveRoomModal",
+  ShowInfoModal = "ShowInfoModal",
   Empty = "",
 }
 
@@ -26,6 +27,7 @@ export interface ModalPayloadTypes {
   [ModalTypes.CreateStatusModal]: any;
   [ModalTypes.CreateRoomModal]: any;
   [ModalTypes.ReserveRoomModal]: any;
+  [ModalTypes.ShowInfoModal]: any;
   [ModalTypes.Empty]: void;
 }
 

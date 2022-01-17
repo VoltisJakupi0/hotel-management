@@ -2,6 +2,7 @@ import { faUserCircle } from "@fortawesome/free-regular-svg-icons";
 import {
   faCog,
   faEnvelopeOpen,
+  faInfo,
   faSearch,
   faSignOutAlt,
   faUserShield,
@@ -16,7 +17,7 @@ import {
   Nav,
   Navbar,
 } from "@themesberg/react-bootstrap";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { auth } from "../api/api";
 import { useAppDispatch } from "../app/store";
@@ -24,6 +25,10 @@ import Profile3 from "../assets/img/team/profile-picture-3.jpg";
 import { setAuthUser } from "../features/auth/authSlice";
 import { authUserSelector } from "../features/auth/selectors/auth.selectors";
 import { removeAuthToken } from "../features/auth/utils/localStorage";
+import ShowInfoModal from "../features/management/components/ShowInfoModal/ShowInfoModal";
+import useShowInfoModal from "../features/management/hooks/useShowInfoModal";
+import useShowInfoCategoryModal from "../features/management/hooks/useShowInfoModal";
+import useKeyPress from "../hooks/useKeyPress/useKeyPress";
 import { api } from "../services/api";
 
 export function User(): ReactElement {
@@ -47,6 +52,10 @@ export default () => {
   const dispatch = useAppDispatch();
   const authUser = useSelector(authUserSelector);
 
+  const shiftPress = useKeyPress("Shift");
+
+  const showInfoModal = useShowInfoModal();
+
   const handleLogout = () => {
     if (authUser) {
       dispatch(setAuthUser(null));
@@ -55,6 +64,12 @@ export default () => {
       removeAuthToken();
     }
   };
+
+  useEffect(() => {
+    if (shiftPress) {
+      showInfoModal();
+    }
+  }, [shiftPress]);
 
   return (
     <Navbar variant="dark" expanded className="ps-0 pe-2 pb-0">
@@ -114,6 +129,12 @@ export default () => {
                 </div>
               </Dropdown.Toggle>
               <Dropdown.Menu className="user-dropdown dropdown-menu-right mt-2">
+                <Dropdown.Item onClick={showInfoModal} className="fw-bold">
+                  <FontAwesomeIcon icon={faInfo} className="text-danger me-2" />
+                  {localStorage.getItem("language") == "sq"
+                    ? "   Manuali"
+                    : "   Manual"}
+                </Dropdown.Item>
                 <Dropdown.Item onClick={handleLogout} className="fw-bold">
                   <FontAwesomeIcon
                     icon={faSignOutAlt}

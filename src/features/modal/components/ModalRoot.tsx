@@ -10,10 +10,7 @@ const CreateUserModal = lazy(
 );
 
 const CreateCategoryModal = lazy(
-  () =>
-    import(
-      "../../management/components/CreateCategoryModal/CreateCategoryModal"
-    )
+  () => import("../../management/components/ShowInfoModal/ShowInfoModal")
 );
 
 const CreateStatusModal = lazy(
@@ -29,12 +26,17 @@ const ReserveRoomModal = lazy(
   () => import("../../management/components/ReserveRoomModal/ReserveRoomModal")
 );
 
+const ShowInfoModal = lazy(
+  () => import("../../management/components/ShowInfoModal/ShowInfoModal")
+);
+
 const Modals = {
   [ModalTypes.CreateUserModal]: CreateUserModal,
   [ModalTypes.CreateCategoryModal]: CreateCategoryModal,
   [ModalTypes.CreateStatusModal]: CreateStatusModal,
   [ModalTypes.CreateRoomModal]: CreateRoomModal,
   [ModalTypes.ReserveRoomModal]: ReserveRoomModal,
+  [ModalTypes.ShowInfoModal]: ShowInfoModal,
   [ModalTypes.Empty]: () => null,
 };
 
